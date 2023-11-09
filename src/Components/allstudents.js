@@ -76,8 +76,8 @@ const handlePage=(pageNumber)=>{
         'x-auth-token': token
       'Content-Type': 'application/json',
       Accept: 'application/json',
-      'Access-Control-Allow-Origin':
-        'hhttps://sparkly-maamoul-719a8b.netlify.app',
+      'Access-Control-Allow-Origin': 'https://sparkly-maamoul-719a8b.netlify.app',
+,
     },
   }
     }
