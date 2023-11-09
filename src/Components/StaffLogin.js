@@ -32,7 +32,7 @@ export default function StaffLogin() {
 
       if (response.data.user) {
   
-        console.log(response.data.user)
+        console.log(response.data.user,response.data.token)
         dispatch({
           type: "login",
           payload: {
