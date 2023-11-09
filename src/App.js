@@ -76,6 +76,10 @@ function AppContent({ role, isAuthenticated }) {
   useEffect(() => {
     async function verifyToken() {
         const token = document.cookie.split("=")[1];
+      if(!token){
+          handleNoToken();
+          return
+        }
 
         try {
             const endpoint =
