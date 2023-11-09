@@ -65,21 +65,14 @@ console.log(token)
 const handlePage=(pageNumber)=>{
   setCurrentPage(pageNumber) 
 }
-  const fetchStudents = async (page) => {
+   const fetchStudents = async (page) => {
     try{
     setLoading(true)
     const { data } = await axios.get(`https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/students?page=${page}`,{
-     {
-    withCredentials: true,
-    crossDomain: true,
-    headers: {
-        'x-auth-token': token
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-      'Access-Control-Allow-Origin': 'https://sparkly-maamoul-719a8b.netlify.app',
-,
-    },
-  }
+    // headers:{
+    //   'x-auth-token': token
+    // }
+    
     }
     
     )
@@ -105,9 +98,7 @@ useEffect(()=>{
   
   const fetchClasses = async () => {
     const { data } = await axios.get("https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/classes",{
-      headers:{
-            "x-auth-token":token
-          }
+     
     })
       setClasses(data.classData);
     
@@ -116,9 +107,9 @@ useEffect(()=>{
   const fetchFilteredStudentsByClass = async (className, page = 1) => {
     const { data } = await axios.get(
       `https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/students?className=${className}&page=${page}`,{
-          headers:{
-            'x-auth-token': token
-          }
+          // headers:{
+          //   'x-auth-token': token
+          // }
         
       }
     );
@@ -148,9 +139,9 @@ useEffect(()=>{
     if (grNum) {
       axios
         .get(`https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/students?GRNo=${grNum}`,{
-          headers:{
-            'x-auth-token': token
-          }
+          // headers:{
+          //   'x-auth-token': token
+          // }
         
       })
         .then((res) =>{
@@ -194,9 +185,9 @@ useEffect(()=>{
    try{
     await axios
       .get(`https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/student/${data.studentId}/voucher`,{
-        headers:{
-          'x-auth-token': token
-        }
+        // headers:{
+        //   'x-auth-token': token
+        // }
       
     })
       .then((res) => {
@@ -255,9 +246,9 @@ if(res && res.data){   navigate("/voucher", {
     let url = `https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/student/${id}/updateStatus`;
     axios
       .patch(url, data,{
-        headers:{
-          'x-auth-token': token
-        }
+        // headers:{
+        //   'x-auth-token': token
+        // }
       
     })
       .then((response) => {
@@ -322,9 +313,9 @@ console.log(feeType)
   const handleStudentDelete = (student) => {
     axios
       .get(`https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/student/${student._id}/delete`,{
-        headers:{
-          'x-auth-token': token
-        }
+        // headers:{
+        //   'x-auth-token': token
+        // }
       
     })
       .then((res) => {
@@ -431,9 +422,9 @@ const handleVoucherModal=()=>{
       .post("https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/student/generateBatchVouchers", {
         StudentIds,
       },{
-        headers:{
-          'x-auth-token': token
-        }
+        // headers:{
+        //   'x-auth-token': token
+        // }
       
     })
       .then((res) => {
