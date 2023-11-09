@@ -39,7 +39,6 @@ export default function StaffLogin() {
             userName: response.data.user.userName,
             campus: response.data.user.campus,
             role:response.data.user.role,
-            token:response.data.token
           },
  
         });
