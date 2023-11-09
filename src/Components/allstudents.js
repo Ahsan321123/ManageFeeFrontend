@@ -69,10 +69,17 @@ const handlePage=(pageNumber)=>{
     try{
     setLoading(true)
     const { data } = await axios.get(`https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/students?page=${page}`,{
-    headers:{
-      'x-auth-token': token
-    }
-    
+     {
+    withCredentials: true,
+    crossDomain: true,
+    headers: {
+        'x-auth-token': token
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      'Access-Control-Allow-Origin':
+        'hhttps://sparkly-maamoul-719a8b.netlify.app',
+    },
+  }
     }
     
     )
