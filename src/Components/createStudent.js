@@ -45,7 +45,7 @@ const token = document.cookie.split('=')[1];
         e.preventDefault();
         const data={name,class:studentClass,fee,DOB,fatherName,dateOfAdmission,gender,
                         phoneNo,address,CNIC,GRNo,extraCharges,annualCharges,labCharges,enrollmentCharges,copyPresentationCharges}
-        axios.post('http://localhost:5000/api/v1/students',data,{
+        axios.post('https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/students',data,{
           headers:{
             'x-auth-token': token
           }
