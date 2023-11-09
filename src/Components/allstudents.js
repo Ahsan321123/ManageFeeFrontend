@@ -68,7 +68,7 @@ const handlePage=(pageNumber)=>{
   const fetchStudents = async (page) => {
     try{
     setLoading(true)
-    const { data } = await axios.get(`http://localhost:5000/api/v1/students?page=${page}`,{
+    const { data } = await axios.get(`https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/students?page=${page}`,{
     headers:{
       'x-auth-token': token
     }
@@ -97,7 +97,7 @@ useEffect(()=>{
 
   
   const fetchClasses = async () => {
-    const { data } = await axios.get("http://localhost:5000/api/v1/classes",{
+    const { data } = await axios.get("https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/classes",{
       headers:{
             "x-auth-token":token
           }
@@ -108,7 +108,7 @@ useEffect(()=>{
 
   const fetchFilteredStudentsByClass = async (className, page = 1) => {
     const { data } = await axios.get(
-      `http://localhost:5000/api/v1/students?className=${className}&page=${page}`,{
+      `https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/students?className=${className}&page=${page}`,{
           headers:{
             'x-auth-token': token
           }
@@ -140,7 +140,7 @@ useEffect(()=>{
   useEffect(() => {
     if (grNum) {
       axios
-        .get(`http://localhost:5000/api/v1/students?GRNo=${grNum}`,{
+        .get(`https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/students?GRNo=${grNum}`,{
           headers:{
             'x-auth-token': token
           }
@@ -186,7 +186,7 @@ useEffect(()=>{
     }
    try{
     await axios
-      .get(`http://localhost:5000/api/v1/student/${data.studentId}/voucher`,{
+      .get(`https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/student/${data.studentId}/voucher`,{
         headers:{
           'x-auth-token': token
         }
@@ -232,7 +232,7 @@ if(res && res.data){   navigate("/voucher", {
   const handleGrNum = (e) => {
     e.preventDefault();
 
-    let url = `http://localhost:5000/api/v1/students?GRNo=${grNum}`;
+    let url = `https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/students?GRNo=${grNum}`;
     axios.get(url).then((res) => { 
      setFilterByGr(res.data.student)});
     
@@ -245,7 +245,7 @@ if(res && res.data){   navigate("/voucher", {
     
     const id = studentId;
     const data = { bankName, date, status,month,feeReceived,feeType};
-    let url = `http://localhost:5000/api/v1/student/${id}/updateStatus`;
+    let url = `https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/student/${id}/updateStatus`;
     axios
       .patch(url, data,{
         headers:{
@@ -296,7 +296,7 @@ if(res && res.data){   navigate("/voucher", {
     e.preventDefault();
     setShowFeeModal(true)
     setLoading(true)
-    const response = await axios.get(`http://localhost:5000/api/v1/student/${id}/checkStatus`)
+    const response = await axios.get(`https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/student/${id}/checkStatus`)
   if ( response.success === false ){
     setStudentFeeData([])
 
@@ -314,7 +314,7 @@ console.log(feeType)
   // delete
   const handleStudentDelete = (student) => {
     axios
-      .get(`http://localhost:5000/api/v1/student/${student._id}/delete`,{
+      .get(`https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/student/${student._id}/delete`,{
         headers:{
           'x-auth-token': token
         }
@@ -421,7 +421,7 @@ const handleVoucherModal=()=>{
 
 
     await axios
-      .post("http://localhost:5000/api/v1/student/generateBatchVouchers", {
+      .post("https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/student/generateBatchVouchers", {
         StudentIds,
       },{
         headers:{
