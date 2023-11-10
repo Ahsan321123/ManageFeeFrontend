@@ -9,7 +9,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#E4E4E4',
     marginLeft:20
   },
+heading:{
+fontSize:20,
+fontWeight:'bold'
 
+},
 
   section: {
     margin: 10,
@@ -24,6 +28,7 @@ const styles = StyleSheet.create({
     marginVertical: 5
   },
   headerRow: {
+    marginTop:10,
     flexDirection: 'row',
     borderBottom: '1pt solid black',
     marginBottom: 5
@@ -70,8 +75,8 @@ if( className==="All Classes"){
         <Document>
                         <Page size="A4" style={styles.page}>
                         <View style={styles.section}>
-                        <Text >Green Peace School</Text>
-            <Text>List of Outstanding Dues</Text>
+                        <Text style={styles.heading } >  Green Peace School</Text>
+            <Text style={{ marginTop:6 }} >List of Outstanding Dues</Text>
             <View style={styles.headerRow}>
               <Text style={styles.gr}>GR No</Text>
               <Text style={styles.studentName}>Student Name</Text>
