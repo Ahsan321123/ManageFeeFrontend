@@ -126,6 +126,7 @@ function AppContent({ role, isAuthenticated }) {
        if(savedRole === "staff"){
         navigate("/") 
         localStorage.removeItem('role')
+        localStorage.removeItem('token')
         toast.error("time expired kindly logged in again", {
           autoClose: false,
           closeOnClick: true,
