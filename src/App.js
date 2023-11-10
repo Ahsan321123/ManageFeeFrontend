@@ -75,8 +75,8 @@ function AppContent({ role, isAuthenticated }) {
 
   useEffect(() => {
     async function verifyToken() {
-        const token = document.cookie.split("=")[1];
-      if(!token){
+        const token = localStorage.getItem('token');
+        if(!token){
           handleNoToken();
           return
         }
@@ -84,8 +84,8 @@ function AppContent({ role, isAuthenticated }) {
         try {
             const endpoint =
                 savedRole == "admin"
-                    ? "http://localhost:5000/api/v1/auth/verifyAdmin"
-                    : "http://localhost:5000/api/v1/auth/verify";
+                    ? "https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/auth/verifyAdmin"
+                    : "https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/auth/verify";
             const response = await axios.get(endpoint, {
                 headers: {
                     "x-auth-token": token,
