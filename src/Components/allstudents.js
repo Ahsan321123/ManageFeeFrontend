@@ -59,9 +59,9 @@ export default function Allstudents() {
 
 //! PAgination handle 
 
-const token = document.cookie.split('=')[1];
+const token = localStorage.getItem('token')
 console.log(token)
-// console.log(token)
+
 const handlePage=(pageNumber)=>{
   setCurrentPage(pageNumber) 
 }
@@ -69,9 +69,9 @@ const handlePage=(pageNumber)=>{
     try{
     setLoading(true)
     const { data } = await axios.get(`https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/students?page=${page}`,{
-    // headers:{
-    //   'x-auth-token': token
-    // }
+    headers:{
+      'x-auth-token': token
+    }
     
     }
     
@@ -107,9 +107,9 @@ useEffect(()=>{
   const fetchFilteredStudentsByClass = async (className, page = 1) => {
     const { data } = await axios.get(
       `https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/students?className=${className}&page=${page}`,{
-          // headers:{
-          //   'x-auth-token': token
-          // }
+          headers:{
+            'x-auth-token': token
+          }
         
       }
     );
@@ -139,9 +139,9 @@ useEffect(()=>{
     if (grNum) {
       axios
         .get(`https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/students?GRNo=${grNum}`,{
-          // headers:{
-          //   'x-auth-token': token
-          // }
+          headers:{
+            'x-auth-token': token
+          }
         
       })
         .then((res) =>{
@@ -185,9 +185,9 @@ useEffect(()=>{
    try{
     await axios
       .get(`https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/student/${data.studentId}/voucher`,{
-        // headers:{
-        //   'x-auth-token': token
-        // }
+        headers:{
+          'x-auth-token': token
+        }
       
     })
       .then((res) => {
@@ -246,9 +246,9 @@ if(res && res.data){   navigate("/voucher", {
     let url = `https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/student/${id}/updateStatus`;
     axios
       .patch(url, data,{
-        // headers:{
-        //   'x-auth-token': token
-        // }
+        headers:{
+          'x-auth-token': token
+        }
       
     })
       .then((response) => {
@@ -313,9 +313,9 @@ console.log(feeType)
   const handleStudentDelete = (student) => {
     axios
       .get(`https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/student/${student._id}/delete`,{
-        // headers:{
-        //   'x-auth-token': token
-        // }
+        headers:{
+          'x-auth-token': token
+        }
       
     })
       .then((res) => {
@@ -422,9 +422,9 @@ const handleVoucherModal=()=>{
       .post("https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/student/generateBatchVouchers", {
         StudentIds,
       },{
-        // headers:{
-        //   'x-auth-token': token
-        // }
+        headers:{
+          'x-auth-token': token
+        }
       
     })
       .then((res) => {
