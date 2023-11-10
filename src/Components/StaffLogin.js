@@ -32,19 +32,20 @@ export default function StaffLogin() {
 
       if (response.data.user) {
   
-        console.log(response.data.user,response.data.token)
+        console.log(response.data.user)
         dispatch({
           type: "login",
           payload: {
             userName: response.data.user.userName,
             campus: response.data.user.campus,
             role:response.data.user.role,
+            
           },
  
         });
-        localStorage.setItem('role','staff')
-        localStorage.setItem('token',response.data.token )
-        console.log(response.data.token)
+        localStorage.setItem("token", response.data.token);
+       
+        localStorage.setItem("role", "staff");
           navigate("/createStudent");
      
    
