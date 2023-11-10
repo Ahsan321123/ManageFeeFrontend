@@ -43,6 +43,8 @@ export default function StaffLogin() {
  
         });
         localStorage.setItem('role','staff')
+        localStorage.setItem('token',response.data.token )
+        console.log(response.data.token)
           navigate("/createStudent");
      
    
