@@ -60,7 +60,7 @@ export default function Allstudents() {
 //! PAgination handle 
 
 const token = localStorage.getItem('token')
-console.log(token)
+
 
 const handlePage=(pageNumber)=>{
   setCurrentPage(pageNumber) 
@@ -76,7 +76,7 @@ const handlePage=(pageNumber)=>{
     }
     
     )
-      console.log(data)
+
       setAllStudent(data.allStudents);
     
       setTotalStudentsCount(data.totalStudents)   
@@ -191,7 +191,7 @@ useEffect(()=>{
       
     })
       .then((res) => {
-        console.log(res.data)
+        
         // passing student data and navigating
 if(res && res.data){   navigate("/voucher", {
   state: {
@@ -242,7 +242,7 @@ if(res && res.data){   navigate("/voucher", {
     e.preventDefault();
     
     const id = studentId;
-    const data = { bankName, date, status,month,feeReceived,feeType};
+    const data = { bankName, date, status,month,feeReceived,feeType,comment};
     let url = `https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/student/${id}/updateStatus`;
     axios
       .patch(url, data,{
@@ -269,7 +269,7 @@ if(res && res.data){   navigate("/voucher", {
      
       })
       .catch((e) => {
-        console.log(e.response)
+        
           if(e.response && e.response.data.message =='already Paid' ){
             toast.error(e.response.data.message,{
               position: toast.POSITION.TOP_CENTER,
@@ -307,7 +307,7 @@ if(res && res.data){   navigate("/voucher", {
   }
 
 
-console.log(feeType)
+
  
   // delete
   const handleStudentDelete = (student) => {
@@ -428,8 +428,7 @@ const handleVoucherModal=()=>{
       
     })
       .then((res) => {
-        // console.log(res.data.students)
-        // console.log(res.data.vouchers)
+      
         navigate("/voucher", {
           state: {
             studentsData: res.data.students,
@@ -922,7 +921,7 @@ onChange={(e)=> setFeeType(prev=>({
           
     
     />
-    {console.log(totalStudentsCount)}
+   
 
 
     {showFeeModal && <CheckStatus
