@@ -1,6 +1,7 @@
 // MyDocument.js
-import React from 'react';
+import React,{useState} from 'react';
 import { Page, Text, View, Document, StyleSheet } from '@react-pdf/renderer';
+
 
 const styles = StyleSheet.create({
   page: {
@@ -31,18 +32,38 @@ const styles = StyleSheet.create({
     width: '10%',
   },
   studentName: {
-    width: '40%',
+    width: '20%',
     paddingLeft: 10
   },
   dueMonths: {
-    width: '40%',
+    width: '30%',
     display:'flex',
     flexDirection: 'column',
     paddingLeft: 10
+  },
+  dueFees:{
+    width: '10%',
+    display:'flex',
+    flexDirection: 'column',
+    paddingLeft: 10,
+    
+  },
+  totalFee:{
+      marginTop:10,
+      fontWeight:'bold',
+      fontSize:20,
+      textAlign:'center'
+
+
   }
 });
 
+
+
 const MyDocument = ({ students, className }) => {
+  
+
+  let totalDueFees = 0;
 
 if( className==="All Classes"){
     return(
@@ -56,9 +77,15 @@ if( className==="All Classes"){
               <Text style={styles.studentName}>Student Name</Text>
               <Text style={styles.dueMonths}> Class Name</Text>
               <Text style={styles.dueMonths}>Due Months</Text>
+              <Text style={styles.dueMonths}>Due Fees</Text>
             </View>
-        {students.map( (student ) =>(
-            <> 
+        {students.map( (student ) =>{
+
+const totalMonths = student.feeStatus?student.feeStatus.length:0;
+const studentDueFees = student.fee?student.fee * totalMonths:0;
+totalDueFees += studentDueFees;
+            
+            return( 
 
     
           <View style={styles.studentRow} key={student._id}>
@@ -68,14 +95,18 @@ if( className==="All Classes"){
                 <Text style={styles.studentName}>{student.className}</Text>
                 <Text style={styles.dueMonths}>
                  Tution Fee of-{student.feeStatus.map(s => s.status === 'Due' ? s.month : '').join(', ')}
+                 
                 </Text>
+                <Text style={styles.dueMonths}>{studentDueFees}</Text>
+             
               </View>
      
-              </>
+              
 
     
-    
-        ))}
+            )
+})}
+   <Text style={styles.totalFee}>Total Due Fees: {totalDueFees}</Text>
         </View>
         </Page>
           </Document>
