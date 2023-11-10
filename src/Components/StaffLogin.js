@@ -8,7 +8,8 @@ export default function StaffLogin() {
   const [password, setPassword] = useState("");
   const [userName, setUserName] = useState("");
   const [campus, setCampus] = useState("");
-
+  const [loading, setLoading] = useState(false);
+  const [success,setSuccess]=useState(false)
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -17,6 +18,7 @@ export default function StaffLogin() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
+      setLoading(true); 
       const data = {
         userName,
         password,
@@ -28,10 +30,16 @@ export default function StaffLogin() {
         data,
         { withCredentials: true }
       );
- 
+      setLoading(false); 
+if(response.data.success === 'true'){
+  setSuccess(true)
+  setTimeout(() => {
+    setSuccess(false);
+  }, 3000);
+}
 
       if (response.data.user) {
-  
+      
         console.log(response.data.user)
         dispatch({
           type: "login",
@@ -69,6 +77,12 @@ export default function StaffLogin() {
             >
               Staff Login
             </h4>
+            {loading && <p style={{ color: "#2c3e50" }}>Waiting...</p>}
+            {success === true && (
+              <p style={{ background: "Green", color: "#2c3e50" }}>
+                Login Success
+              </p>
+            )   }
             <form onSubmit={handleLogin}>
               <div className="mb-3">
                 <label htmlFor="inputName" className="form-label">
