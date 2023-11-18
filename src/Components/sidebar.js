@@ -25,7 +25,7 @@ const savedRole =localStorage.getItem('role')
 
      
         try {
-             const endPoint= role === "admin" ? 'http://localhost:5000/api/v1/admin/logout':'http://localhost:5000/api/v1/staff/logout'      
+             const endPoint= role === "admin" ? 'https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/admin/logout':'https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/staff/logout'      
             const response = await axios.get(endPoint, { withCredentials: true });
             console.log(response.data)
             if (response.data.sucess === true) {
