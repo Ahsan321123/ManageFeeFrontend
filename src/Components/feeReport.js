@@ -33,7 +33,7 @@ const FeeReport = () => {
       if (startDate && endDate) {
         await axios
           .get(
-            `https://gps-fee-3ed30914cca3.herokuapp.com/feeReport?startDate=${startDate}&endDate=${endDate}`,
+            `https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/student/feeReport?startDate=${startDate}&endDate=${endDate}`,
             {
               headers: {
                 "x-auth-token": token,
