@@ -20,7 +20,7 @@ const FeeReport = () => {
   const [loading, setLoading] = useState(false);
   const [showPDF, setShowPDF] = useState(false);
 
-  const token = document.cookie.split("=")[1];
+    const token = localStorage.getItem('token')
 
   
   
