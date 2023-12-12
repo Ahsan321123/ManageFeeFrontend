@@ -30,6 +30,7 @@ const savedRole =localStorage.getItem('role')
             console.log(response.data)
             if (response.data.sucess === true) {
                 localStorage.removeItem('role')
+                localStorage.removeItem('token')
                 toast.success("Logout Sucess", {
                     position: toast.POSITION.TOP_CENTER,
                     autoClose: 2000,
