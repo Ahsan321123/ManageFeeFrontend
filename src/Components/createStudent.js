@@ -37,7 +37,7 @@ export default function CreateStudent() {
 
 
 const inputRef= useRef(null)
-const token = document.cookie.split('=')[1];
+const token = localStorage.getItem('token')
 
     const handleSubmit = (e)=>{
       
