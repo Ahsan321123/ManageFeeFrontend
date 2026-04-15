@@ -668,13 +668,15 @@ if( location.state.from==="generateAll"){
           {isBatch ? `Batch Vouchers — ${month}` : `${studentName} — ${month}`}
         </span>
       </div>
-      <PDFViewer width="100%" height="calc(100vh - 60px)" style={{ border: 'none' }}>
-        <Document>
-          <Page size="A4" style={styles.page}>
-            {renderContent()}
-          </Page>
-        </Document>
-      </PDFViewer>
+      <div className="vc-pdf-viewer-wrap">
+        <PDFViewer width="100%" height="100%" style={{ border: 'none', display: 'block' }}>
+          <Document>
+            <Page size="A4" style={styles.page}>
+              {renderContent()}
+            </Page>
+          </Document>
+        </PDFViewer>
+      </div>
     </div>
   );
 }

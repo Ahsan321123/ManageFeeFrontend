@@ -1094,7 +1094,9 @@ background-color: #fff;
 
 /* ── Voucher ── */
 .vc-generating {
-  min-height:100vh; display:flex; flex-direction:column;
+  min-height:100vh;
+  margin-left:250px;
+  display:flex; flex-direction:column;
   align-items:center; justify-content:center; gap:20px;
   background:#f0f2f5;
 }
@@ -1107,7 +1109,9 @@ background-color: #fff;
 }
 .vc-gen-text { font-size:15px; color:#64748b; font-family:'Inter',sans-serif; }
 .vc-preview-page {
-  min-height:100vh; display:flex; align-items:center;
+  min-height:100vh;
+  margin-left:250px;
+  display:flex; align-items:center;
   justify-content:center; background:#f0f2f5; padding:24px;
 }
 .vc-preview-card {
@@ -1139,11 +1143,23 @@ background-color: #fff;
   cursor:pointer; transition:background 0.2s;
 }
 .vc-back-btn:hover { background:#f0f2f5; }
-.vc-pdf-page { display:flex; flex-direction:column; height:100vh; }
+.vc-pdf-page {
+  display:flex;
+  flex-direction:column;
+  height:100vh;
+  margin-left:250px;
+  overflow:hidden;
+}
+
+.vc-pdf-viewer-wrap {
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
 .vc-pdf-toolbar {
   display:flex; align-items:center; gap:16px;
   padding:12px 20px; background:#fff;
-  border-bottom:1px solid #e8ecf0; height:60px;
+  border-bottom:1px solid #e8ecf0; height:56px; flex-shrink:0;
   box-shadow:0 2px 4px rgba(0,0,0,0.05);
 }
 .vc-pdf-title { font-size:14px; font-weight:600; color:#374151; font-family:'Inter',sans-serif; }
