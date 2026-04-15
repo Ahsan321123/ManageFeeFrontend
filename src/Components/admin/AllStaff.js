@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axiosInstance from '../../api/axiosInstance';
 import React, { useEffect, useState } from 'react'
 import { toast } from 'react-toastify';
 
@@ -19,7 +19,7 @@ export default function AllStaff() {
         const getStaff = async()=>{
             
             try{
-                const res = await axios.get("http://localhost:5000/api/v1/admin/staff",{
+                const res = await axiosInstance.get("/admin/staff",{
                     headers:{
                         "x-auth-token":token
                     }
@@ -49,7 +49,7 @@ export default function AllStaff() {
         try
         {
     
-        const response = await axios.delete(`http://localhost:5000/api/v1/admin/staff/${id}/delete`,{
+        const response = await axiosInstance.delete(`/admin/staff/${id}/delete`,{
             headers:{
                 'x-auth-token':token
             }
@@ -78,7 +78,7 @@ export default function AllStaff() {
         e.preventDefault()
         const data ={userName:staffName,campus:staffCampus,password:staffPassword}
 
-        const response =await axios.put(`http://localhost:5000/api/v1/admin/staff/${id}/update`,
+        const response =await axiosInstance.put(`/admin/staff/${id}/update`,
         data,{
             headers:{
                 'x-auth-token':token

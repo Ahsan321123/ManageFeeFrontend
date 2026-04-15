@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axiosInstance from '../../api/axiosInstance'
 import React, { useEffect, useState } from 'react'
 
 export default function StudentCount() {
@@ -12,7 +12,7 @@ export default function StudentCount() {
     useEffect(()=>{
 
         const allStudents = async()=>{
-            const res = await axios.get('http://localhost:5000/api/v1/admin/students',{
+            const res = await axiosInstance.get('/admin/students',{
                 headers:{
                     'x-auth-token':adminToken
                 }

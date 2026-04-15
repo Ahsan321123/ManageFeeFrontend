@@ -1,5 +1,5 @@
 import React, { useEffect, useState,useRef } from 'react'
-import axios from 'axios';
+import axiosInstance from '../api/axiosInstance';
 import {toast} from 'react-toastify'
 import Loader from './Loader'
 
@@ -29,7 +29,7 @@ export default function CreateStudent() {
     const [enrollmentCharges,setEnrollmentFee]=useState('');
     const [copyPresentationCharges,setCopyPresentationFee]=useState('');
     useEffect(()=>{
-      axios.get('https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/classes')
+      axiosInstance.get('/classes')
       .then(res=>{
             setClasses(res.data.classData)       
 })
@@ -45,7 +45,7 @@ const token = localStorage.getItem('token')
         e.preventDefault();
         const data={name,class:studentClass,fee,DOB,fatherName,dateOfAdmission,gender,
                         phoneNo,address,CNIC,GRNo,extraCharges,annualCharges,labCharges,enrollmentCharges,copyPresentationCharges}
-        axios.post('https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/students',data,{
+        axiosInstance.post('/students',data,{
           headers:{
             'x-auth-token': token
           }
@@ -75,190 +75,163 @@ const token = localStorage.getItem('token')
     }
 
   return (
-    <div className="container mb-4">
-      {loading && <Loader/>}
-      
-      <div className="row justify-content-center">
-        <div className="col-md-6 mt-5">
-          <div className="card">
-            <div className="card-body">
-              <h4 className="card-title text-center mb-4">Create Student</h4>
-              <form className='form-break'>
-                <div>
-                <div className="mb-3">
-                  <label htmlFor="inputName" className="form-label">Student Name</label>
-                  <input type="text" className="form-control" id="inputName" 
-                  placeholder="Enter student name" 
-                  onChange={e=>{setName(e.target.value)}}
-                  ref={inputRef}
-                  autoComplete='off'
-                  required/>
-                </div>
+    <div className="cs-page">
+      {loading && <Loader />}
 
-                <div className="mb-3">
-                  <label htmlFor="inputName" className="form-label">Father Name</label>
-                  <input type="text" className="form-control" id="inputName" 
-                  placeholder="Enter Father name" 
-                  required
-                  onChange={e=>{ 
-                  
-                    setFatherName(e.target.value)}}
-                  autoComplete='off'/>
-                </div>
+      <div className="cs-card">
 
-                <div className="mb-3">
-                  <label htmlFor="inputName" className="form-label">GRNo.</label>
-                  <input type="number" 
-                  className={`form-control ${grError ? "is-invalid" : ""}`}
-                  id="inputName" 
-                  placeholder="Enter GRNo" 
-                  required
-                  onChange={e=>{
-                    setGrError(null)
-                    setGRNo(e.target.value)}}
-                  autoComplete='off'/>
-                       {grError && <div className="text-danger">{grError}</div>}
-                </div>
-           
-                <div className="mb-3">
-                  <label htmlFor="inputName" className="form-label">Date of Admission</label>
-                  <input type="date" className="form-control" id="inputName" 
-                  placeholder="Date of Admission" 
-                  onChange={e=>{setDateOfAdmission(e.target.value)}}
-                  required
-                  autoComplete='off'/>
-                </div>
-
-                <div className="mb-3">
-                  <label htmlFor="inputName" className="form-label">Date of Birth</label>
-                  <input type="date" className="form-control" id="inputName" 
-                  placeholder="Date of Birth" 
-                  onChange={e=>{setDOB(e.target.value)}}
-                  autoComplete='off'
-                  required
-                  />
-                  
-                </div>
-
-                <div className="mb-3">
-                  <label htmlFor="inputName" className="form-label">Gender</label>
-                  <input type="text" className="form-control" id="inputName" 
-                  placeholder="Gender" 
-                  onChange={e=>{setGender(e.target.value)}}
-                  autoComplete='off'
-                  required/>
-                </div>
-
-                <div className="mb-3">
-                  <label htmlFor="inputName" className="form-label">Phone No.</label>
-                  <input type="number" className="form-control" id="inputName" 
-                  placeholder="Phone No." 
-                  onChange={e=>{setPhoneNo(e.target.value)}}
-                  autoComplete='off'
-                  required/>
-                      {phoneError && <div className="text-danger">{phoneError}</div>}
-                </div>
-                </div>
-
-            <div>      
-                <div className="mb-3">
-                  <label htmlFor="inputName" className="form-label">CNIC</label>
-                  <input type="text" className="form-control" id="inputName" 
-                  placeholder="CNIC" 
-                  onChange={e=>{setCNIC(e.target.value)}}
-                  autoComplete='off'/>
-                  {cnicError && <div className="text-danger">{cnicError}</div>}
-                </div>
-
-                <div className="mb-3">
-                  <label htmlFor="inputName" className="form-label">Address</label>
-                  <input type="text" className="form-control" id="inputName" 
-                  placeholder="Address" 
-                  onChange={e=>{setAddress(e.target.value)}}
-                  autoComplete='off'
-                  required/>
-                </div>
-
-                <div className="mb-3">
-   <label htmlFor="inputClass" className="form-label">Class</label>
-   <select 
-      id="inputClass" 
-      className="form-control"
-      required 
-      onChange={e => setStudentClass(e.target.value)}
-   >
-      <option value="">Select Class </option>
-      {classes && classes.map((classList, index) => (
-         <option key={index} value={classList.className}>
-         {classList.className}
-         </option>
-      ))}
-   </select>
-</div>
-
-                <div className="mb-3">
-                  <label htmlFor="inputFees" className="form-label">Tuition Fee</label>
-                  <input type="number" className="form-control" id="inputFees" 
-                  placeholder="Enter fees" 
-                  onChange={e=>{setFees(e.target.value)}}
-                  autoComplete='off'
-                  required/>
-                </div>
-               
-                <div className="mb-3">
-                  <label htmlFor="inputFees" className="form-label">Annual Charges</label>
-                  <input type="number" className="form-control" id="inputFees" 
-                  placeholder="Enter fees" 
-                  onChange={e=>{setAnnualCharges(e.target.value)}}
-                  autoComplete='off'/>
-                </div>
-               
-                <div className="mb-3">
-                  <label htmlFor="inputFees" className="form-label">Lab Charges</label>
-                  <input type="number" className="form-control" id="inputFees" 
-                  placeholder="Enter Lab charges" 
-                  onChange={e=>{setLabCharges(e.target.value)}}
-                  autoComplete='off'/>
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="inputFees" className="form-label">Erollment Charges</label>
-                  <input type="number" className="form-control" id="inputFees" 
-                  placeholder="Enter Lab charges" 
-                  onChange={e=>{setEnrollmentFee(e.target.value)}}
-                  autoComplete='off'/>
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="inputFees" className="form-label">Copy Presentation Charges</label>
-                  <input type="number" className="form-control" id="inputFees" 
-                  placeholder="Enter Lab charges" 
-                  onChange={e=>{setCopyPresentationFee(e.target.value)}}
-                  autoComplete='off'/>
-                </div>
-               
-                <div className="mb-3">
-                  <label htmlFor="inputFees" className="form-label">Extra charges</label>
-                  <input type="number" className="form-control" id="inputFees" 
-                  placeholder="Enter Extra fees" 
-                  onChange={e=>{setExtraCharges(e.target.value)}}
-                  autoComplete='off'/>
-                </div>
-
-               
-
-              </div>
-                
-
-              </form>
-              <div className="d-grid gap-2">
-                  <button  style={{   backgroundColor:'#2c3e50'}} 
-                  onClick={handleSubmit}
-                    className="btn btn-primary">Save Student</button>
-                </div>
-
-            </div>
-          </div>
+        {/* Header */}
+        <div className="cs-header">
+          <h3 className="cs-title">New Student Registration</h3>
+          <p className="cs-subtitle">Fill in the details below to register a new student</p>
         </div>
+
+        <form onSubmit={handleSubmit} className="cs-form">
+
+          {/* ── Personal Information ── */}
+          <div className="cs-section-label">Personal Information</div>
+          <div className="cs-grid">
+
+            <div className="cs-field">
+              <label className="cs-label">Student Name <span className="cs-required">*</span></label>
+              <input type="text" className="cs-input" placeholder="Enter student name"
+                onChange={e => setName(e.target.value)} ref={inputRef} autoComplete="off" required />
+            </div>
+
+            <div className="cs-field">
+              <label className="cs-label">Father Name <span className="cs-required">*</span></label>
+              <input type="text" className="cs-input" placeholder="Enter father name"
+                onChange={e => setFatherName(e.target.value)} autoComplete="off" required />
+            </div>
+
+            <div className="cs-field">
+              <label className="cs-label">GR No. <span className="cs-required">*</span></label>
+              <input type="number" className={`cs-input ${grError ? 'cs-input-error' : ''}`}
+                placeholder="Enter GR number"
+                onChange={e => { setGrError(null); setGRNo(e.target.value); }}
+                autoComplete="off" required />
+              {grError && <span className="cs-error-msg">{grError}</span>}
+            </div>
+
+            <div className="cs-field">
+              <label className="cs-label">Gender <span className="cs-required">*</span></label>
+              <select className="cs-input" onChange={e => setGender(e.target.value)} required>
+                <option value="">Select gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+            </div>
+
+            <div className="cs-field">
+              <label className="cs-label">Date of Birth <span className="cs-required">*</span></label>
+              <input type="date" className="cs-input"
+                onChange={e => setDOB(e.target.value)} autoComplete="off" required />
+            </div>
+
+            <div className="cs-field">
+              <label className="cs-label">Date of Admission <span className="cs-required">*</span></label>
+              <input type="date" className="cs-input"
+                onChange={e => setDateOfAdmission(e.target.value)} autoComplete="off" required />
+            </div>
+
+            <div className="cs-field">
+              <label className="cs-label">Phone No. <span className="cs-required">*</span></label>
+              <input type="number" className="cs-input" placeholder="e.g. 03001234567"
+                onChange={e => setPhoneNo(e.target.value)} autoComplete="off" required />
+              {phoneError && <span className="cs-error-msg">{phoneError}</span>}
+            </div>
+
+            <div className="cs-field">
+              <label className="cs-label">CNIC</label>
+              <input type="text" className="cs-input" placeholder="e.g. 35201-1234567-1"
+                onChange={e => setCNIC(e.target.value)} autoComplete="off" />
+              {cnicError && <span className="cs-error-msg">{cnicError}</span>}
+            </div>
+
+            <div className="cs-field cs-field-full">
+              <label className="cs-label">Address <span className="cs-required">*</span></label>
+              <input type="text" className="cs-input" placeholder="Street, City"
+                onChange={e => setAddress(e.target.value)} autoComplete="off" required />
+            </div>
+
+            <div className="cs-field cs-field-full">
+              <label className="cs-label">Class <span className="cs-required">*</span></label>
+              <select className="cs-input" onChange={e => setStudentClass(e.target.value)} required>
+                <option value="">Select class</option>
+                {classes && classes.map((c, i) => (
+                  <option key={i} value={c.className}>{c.className}</option>
+                ))}
+              </select>
+            </div>
+
+          </div>
+
+          {/* ── Fee Structure ── */}
+          <div className="cs-section-label" style={{ marginTop: 28 }}>Fee Structure</div>
+          <div className="cs-grid">
+
+            <div className="cs-field">
+              <label className="cs-label">Tuition Fee <span className="cs-required">*</span></label>
+              <div className="cs-input-prefix-wrap">
+                <span className="cs-prefix">Rs.</span>
+                <input type="number" className="cs-input cs-input-prefixed" placeholder="0"
+                  onChange={e => setFees(e.target.value)} autoComplete="off" required />
+              </div>
+            </div>
+
+            <div className="cs-field">
+              <label className="cs-label">Annual Charges</label>
+              <div className="cs-input-prefix-wrap">
+                <span className="cs-prefix">Rs.</span>
+                <input type="number" className="cs-input cs-input-prefixed" placeholder="0"
+                  onChange={e => setAnnualCharges(e.target.value)} autoComplete="off" />
+              </div>
+            </div>
+
+            <div className="cs-field">
+              <label className="cs-label">Lab Charges</label>
+              <div className="cs-input-prefix-wrap">
+                <span className="cs-prefix">Rs.</span>
+                <input type="number" className="cs-input cs-input-prefixed" placeholder="0"
+                  onChange={e => setLabCharges(e.target.value)} autoComplete="off" />
+              </div>
+            </div>
+
+            <div className="cs-field">
+              <label className="cs-label">Enrollment Charges</label>
+              <div className="cs-input-prefix-wrap">
+                <span className="cs-prefix">Rs.</span>
+                <input type="number" className="cs-input cs-input-prefixed" placeholder="0"
+                  onChange={e => setEnrollmentFee(e.target.value)} autoComplete="off" />
+              </div>
+            </div>
+
+            <div className="cs-field">
+              <label className="cs-label">Copy Presentation Charges</label>
+              <div className="cs-input-prefix-wrap">
+                <span className="cs-prefix">Rs.</span>
+                <input type="number" className="cs-input cs-input-prefixed" placeholder="0"
+                  onChange={e => setCopyPresentationFee(e.target.value)} autoComplete="off" />
+              </div>
+            </div>
+
+            <div className="cs-field">
+              <label className="cs-label">Extra Charges</label>
+              <div className="cs-input-prefix-wrap">
+                <span className="cs-prefix">Rs.</span>
+                <input type="number" className="cs-input cs-input-prefixed" placeholder="0"
+                  onChange={e => setExtraCharges(e.target.value)} autoComplete="off" />
+              </div>
+            </div>
+
+          </div>
+
+          <button type="submit" className="cs-submit-btn">
+            Save Student
+          </button>
+
+        </form>
       </div>
     </div>
-)
+  )
 }

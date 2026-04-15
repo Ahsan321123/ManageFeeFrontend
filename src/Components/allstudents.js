@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from "react";
-import axios from "axios";
+import axiosInstance from "../api/axiosInstance";
 import Voucher from "../Components/voucher";
 import { useNavigate } from "react-router-dom";
 import UpdateStudent from "./updateStudent";
 import Loader from '../Components/Loader'
+import StudentCardSkeleton from './StudentCardSkeleton'
 import { toast } from "react-toastify";
 import PaginationComp from "./paginationComp";
 import { CSVLink } from "react-csv";
@@ -68,7 +69,7 @@ const handlePage=(pageNumber)=>{
    const fetchStudents = async (page) => {
     try{
     setLoading(true)
-    const { data } = await axios.get(`https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/students?page=${page}`,{
+    const { data } = await axiosInstance.get(`/students?page=${page}`,{
     headers:{
       'x-auth-token': token
     }
@@ -97,7 +98,7 @@ useEffect(()=>{
 
   
   const fetchClasses = async () => {
-    const { data } = await axios.get("https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/classes",{
+    const { data } = await axiosInstance.get("/classes",{
      
     })
       setClasses(data.classData);
@@ -105,8 +106,8 @@ useEffect(()=>{
   };
 
   const fetchFilteredStudentsByClass = async (className, page = 1) => {
-    const { data } = await axios.get(
-      `https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/students?className=${className}&page=${page}`,{
+    const { data } = await axiosInstance.get(
+      `/students?className=${className}&page=${page}`,{
           headers:{
             'x-auth-token': token
           }
@@ -137,8 +138,8 @@ useEffect(()=>{
 
   useEffect(() => {
     if (grNum) {
-      axios
-        .get(`https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/students?GRNo=${grNum}`,{
+      axiosInstance
+        .get(`/students?GRNo=${grNum}`,{
           headers:{
             'x-auth-token': token
           }
@@ -183,8 +184,8 @@ useEffect(()=>{
     student : vocuherData.voucherStud
     }
    try{
-    await axios
-      .get(`https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/student/${data.studentId}/voucher`,{
+    await axiosInstance
+      .get(`/student/${data.studentId}/voucher`,{
         headers:{
           'x-auth-token': token
         }
@@ -230,8 +231,8 @@ if(res && res.data){   navigate("/voucher", {
   const handleGrNum = (e) => {
     e.preventDefault();
 
-    let url = `https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/students?GRNo=${grNum}`;
-    axios.get(url).then((res) => { 
+    let url = `/students?GRNo=${grNum}`;
+    axiosInstance.get(url).then((res) => {
      setFilterByGr(res.data.student)});
     
   };
@@ -243,8 +244,8 @@ if(res && res.data){   navigate("/voucher", {
     
     const id = studentId;
     const data = { bankName, date, status,month,feeReceived,feeType,comment};
-    let url = `https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/student/${id}/updateStatus`;
-    axios
+    let url = `/student/${id}/updateStatus`;
+    axiosInstance
       .patch(url, data,{
         headers:{
           'x-auth-token': token
@@ -294,7 +295,7 @@ if(res && res.data){   navigate("/voucher", {
     e.preventDefault();
     setShowFeeModal(true)
     setLoading(true)
-    const response = await axios.get(`https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/student/${id}/checkStatus`)
+    const response = await axiosInstance.get(`/student/${id}/checkStatus`)
   if ( response.success === false ){
     setStudentFeeData([])
 
@@ -311,8 +312,8 @@ if(res && res.data){   navigate("/voucher", {
  
   // delete
   const handleStudentDelete = (student) => {
-    axios
-      .get(`https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/student/${student._id}/delete`,{
+    axiosInstance
+      .get(`/student/${student._id}/delete`,{
         headers:{
           'x-auth-token': token
         }
@@ -343,50 +344,46 @@ if(res && res.data){   navigate("/voucher", {
   };
 
   const renderStudents = (studentsList) =>
-  
     studentsList.map((student) => (
-      
-      <div className="card w-50 mx-auto my-3" key={student._id}>
-        <h5 className="card-header d-flex justify-content-between">
-          {student.name}
-          <span>Fee Status : <button 
-    onClick={(e) => handleCheckStatus(e, student._id)}
- className="checkStatusBtn"
->
-    Check Status
-</button>
-</span>
-        </h5>
-
-        <div className="card-body">
-          <h5 className="card-title">Class {student.className}</h5>
+      <div className="student-card" key={student._id}>
+        <div className="student-card-header">
+          <div className="student-info">
+            <div className="student-avatar">
+              {student.name?.charAt(0).toUpperCase()}
+            </div>
+            <div>
+              <h5 className="student-name">{student.name}</h5>
+              <span className="student-class-badge">Class {student.className}</span>
+            </div>
+          </div>
           <button
-          style={{   backgroundColor:'#2c3e50'}}
-            className="btn btn-primary"
+            onClick={(e) => handleCheckStatus(e, student._id)}
+            className="check-status-btn"
+          >
+            Check Status
+          </button>
+        </div>
+        <div className="student-card-actions">
+          <button
+            className="action-btn action-btn-primary"
             onClick={() => handleUpdate(student._id)}
           >
-            Update fee status
+            Update Fee
           </button>
           <button
-          style={{   backgroundColor:'#2c3e50'}}
-            className="btn btn-primary mx-2"
-            onClick={() => handleVoucherButtonClick(
-               student._id,student ,
-               setSingelVocuher(true)
-            )  }
+            className="action-btn action-btn-primary"
+            onClick={() => handleVoucherButtonClick(student._id, student, setSingelVocuher(true))}
           >
             Generate Voucher
           </button>
-
           <button
-          style={{   backgroundColor:'#2c3e50'}}
-            className="btn btn-primary mx-2"
+            className="action-btn action-btn-secondary"
             onClick={() => handleStudentUpdate(student)}
           >
-            View&Update Student
+            View & Update
           </button>
           <button
-            className="btn btn-danger mx-2"
+            className="action-btn action-btn-danger"
             onClick={() => handleStudentDelete(student)}
           >
             Delete
@@ -418,8 +415,8 @@ const handleVoucherModal=()=>{
   const generateAllVouchers = async (StudentIds) => {
 
 
-    await axios
-      .post("https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/student/generateBatchVouchers", {
+    await axiosInstance
+      .post("/student/generateBatchVouchers", {
         StudentIds,
       },{
         headers:{
@@ -495,88 +492,65 @@ const allMonths= ["January", "February", "March", "April", "May", "June", "July"
 
   return (
     <>
-      <div>
-        {loading && <Loader/>}
+      <div className="as-page">
 
-        
-        <div className="row justify-content-end mx-5 my-4">
-          <div className="col-md-3">
-            <label htmlFor="classFilter" className="d-block mb-1">
-              Filter by Class:
-            </label>
-            <select
-              className="form-select"
-              id="classFilter"
-              value={classFilter}
-              onChange={(e)=>handleClassFilterChange(e)}
-            >
+        {/* Filter Bar */}
+        <div className="as-filter-bar">
+          <div className="as-filter-group">
+            <label className="as-filter-label">Class</label>
+            <select className="as-select" value={classFilter} onChange={(e) => handleClassFilterChange(e)}>
               <option value="">All Classes</option>
               {uniqueClasses.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
+                <option key={c} value={c}>{c}</option>
               ))}
             </select>
           </div>
 
-          {/*! Filter By Status */}
-
-        <div className="col-md-3">
-            <label htmlFor="classFilter" className="d-block mb-1">
-              Filter by Status:
-            </label>
-            <select
-              className="form-select"
-              id="classFilter"
-              value={studentStatus}
-              onChange={(e) => setStudentStatus(e.target.value)}
-            >
-              <option value=""> All </option>
-              <option value="Paid">paid</option>
-              <option value="pending">pending</option>
+          <div className="as-filter-group">
+            <label className="as-filter-label">Status</label>
+            <select className="as-select" value={studentStatus} onChange={(e) => setStudentStatus(e.target.value)}>
+              <option value="">All</option>
+              <option value="Paid">Paid</option>
+              <option value="pending">Pending</option>
             </select>
           </div>
 
-          <div className="col-md-4">
-            <label htmlFor="grNum" className="d-block mb-1">
-              Filter by Gr:
-            </label>
-            <form onSubmit={handleGrNum} className="d-flex align-items-center">
+          <form onSubmit={handleGrNum} className="as-filter-group as-gr-form">
+            <label className="as-filter-label">GR Number</label>
+            <div className="as-gr-wrap">
               <input
-                id="grNum"
-                className="form-control mx-2"
-                style={{ flex: "1 0 60%" }}
+                className="as-gr-input"
                 type="number"
+                placeholder="Search by GR No."
                 value={grNum}
                 onChange={(e) => setGrNum(e.target.value)}
               />
-              <button style={{   backgroundColor:'#2c3e50'}} className="btn btn-primary" type="submit">
-                Search
-              </button>
-            </form>
-          </div>
-          
-        </div>
-        {filterData.length > 0 && (
-        <div className="d-flex justify-content-end mt-1">
+              <button className="as-gr-btn" type="submit">Search</button>
+            </div>
+          </form>
+
           {filterData.length > 0 && (
-            <button
-            style={{   backgroundColor:'#2c3e50'}} 
-              className="csv-btn voucher-btn"
-              onClick={ handleVoucherModal}
-            >
-              Generate All Vouchers
-            </button>
+            <div className="as-filter-group as-filter-action">
+              <label className="as-filter-label">&nbsp;</label>
+              <button className="as-voucher-btn" onClick={handleVoucherModal}>
+                Generate All Vouchers
+              </button>
+            </div>
           )}
         </div>
-      )}
       {/* render  */}
 
-         {     studentsToRender.length===0 ? (
-      <div className=" d-flex justify-content-center align-items-center">
-      <h4>No Students Found</h4>
-      </div>
-    ):   (renderStudents(studentsToRender))}
+        <div className="as-cards-wrap">
+        {loading ? (
+          <StudentCardSkeleton count={5} />
+        ) : studentsToRender.length === 0 ? (
+          <div className="msg-container">
+            <div className="no-data-message">No Students Found</div>
+          </div>
+        ) : (
+          renderStudents(studentsToRender)
+        )}
+        </div>
 {/* Conditionally render the CSVLink button when studentStatus is "pending" */}
 {
 studentStatus == "pending" &&  
@@ -802,8 +776,8 @@ onChange={(e)=> setFeeType(prev=>({
             </div>
           </div>
         )}
-      </div>
-      
+      </div>{/* end as-page */}
+
 {/* voucher Modal */}
 
 { voucherModal && 

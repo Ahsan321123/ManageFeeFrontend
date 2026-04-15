@@ -1,12 +1,14 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Document, Page, Text, View, StyleSheet, PDFViewer, Image } from '@react-pdf/renderer';
-
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 
 const Voucher = () => {
+  const [showPDF, setShowPDF] = useState(false);
+  const [generating, setGenerating] = useState(true);
+  const navigate = useNavigate();
 
-    // Reciveing students Data in location object 
+    // Reciveing students Data in location object
  const  location=useLocation()
 
 //  Getting Data
@@ -613,24 +615,68 @@ if( location.state.from==="generateAll"){
 
 
 
+  const isBatch = location.state?.from === "generateAll";
+  const studentCount = isBatch ? (location.state?.studentsData?.length || 0) : 1;
+  const studentName = !isBatch ? individualvoucherData?.studentName : null;
+  const month = isBatch ? batchVocuhersMonth : SingelvoucherMonth;
+
+  useEffect(() => {
+    const t = setTimeout(() => setGenerating(false), 900);
+    return () => clearTimeout(t);
+  }, []);
+
+  if (generating) {
+    return (
+      <div className="vc-generating">
+        <div className="vc-spinner" />
+        <p className="vc-gen-text">Generating voucher{isBatch ? 's' : ''}…</p>
+      </div>
+    );
+  }
+
+  if (!showPDF) {
+    return (
+      <div className="vc-preview-page">
+        <div className="vc-preview-card">
+          <div className="vc-preview-icon">✓</div>
+          <h3 className="vc-preview-title">Voucher Ready</h3>
+          <p className="vc-preview-sub">
+            {isBatch
+              ? `${studentCount} voucher(s) generated for ${month}`
+              : `${studentName} — ${month}`}
+          </p>
+          <div className="vc-preview-actions">
+            <button className="vc-view-btn" onClick={() => setShowPDF(true)}>
+              View / Print PDF
+            </button>
+            <button className="vc-back-btn" onClick={() => navigate('/allstudents')}>
+              ← Back to Students
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-
-    <PDFViewer width="100%" height="600">
- 
-    <Document>
-    <Page size="A4" style={styles.page}>
-
-                    {renderContent()}
-                 
-
-   
-      </Page>
-    </Document>
-
-  </PDFViewer>
-
-   
-
-)}
+    <div className="vc-pdf-page">
+      <div className="vc-pdf-toolbar">
+        <button className="vc-back-btn" onClick={() => setShowPDF(false)}>
+          ← Back
+        </button>
+        <span className="vc-pdf-title">
+          {isBatch ? `Batch Vouchers — ${month}` : `${studentName} — ${month}`}
+        </span>
+      </div>
+      <PDFViewer width="100%" height="calc(100vh - 60px)" style={{ border: 'none' }}>
+        <Document>
+          <Page size="A4" style={styles.page}>
+            {renderContent()}
+          </Page>
+        </Document>
+      </PDFViewer>
+    </div>
+  );
+}
  
 export default Voucher;

@@ -1,100 +1,105 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-// import AdminLogin from './admin/AdminLogin';
+import axiosInstance from '../api/axiosInstance';
+import {
+    UserPlus,
+    Users,
+    BookOpen,
+    BarChart2,
+    AlertTriangle,
+    LogOut,
+    UserCog,
+    Database,
+    GraduationCap,
+} from 'lucide-react';
 
 export default function Sidebar() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
-
-    const { userName, campus } = useSelector(state => state.root);
-    
-    const {role }=useSelector(state => state.root)
-const savedRole =localStorage.getItem('role')
-
-    const name = savedRole === 'admin'? 'admin': userName || "";
-    const newName = name ? (name[0].toUpperCase() + name.slice(1)) : "";
-
-
+    const { userName, campus, role } = useSelector(state => state.root);
+    const savedRole = localStorage.getItem('role');
+    const name = savedRole === 'admin' ? 'Admin' : userName || '';
+    const initials = name ? name[0].toUpperCase() : '?';
 
     const handleLogout = async (e) => {
         e.preventDefault();
-
-     
         try {
-             const endPoint= role === "admin" ? 'https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/admin/logout':'https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/staff/logout'      
-            const response = await axios.get(endPoint, { withCredentials: true });
-            console.log(response.data)
+            const endpoint = role === 'admin' ? '/admin/logout' : '/staff/logout';
+            const response = await axiosInstance.get(endpoint, { withCredentials: true });
             if (response.data.sucess === true) {
-                localStorage.removeItem('role')
-                localStorage.removeItem('token')
-                toast.success("Logout Sucess", {
-                    position: toast.POSITION.TOP_CENTER,
-                    autoClose: 2000,
-                  });
-            
-                dispatch({ type: "logout",
-                  payload:{
-                    userName:null,
-                    role:null,
-                    campus:null,
-                  }
-            },
-               
-                );
+                localStorage.removeItem('role');
+                localStorage.removeItem('token');
+                dispatch({ type: 'logout', payload: { userName: null, role: null, campus: null } });
                 localStorage.setItem('logoutEvent', Date.now().toString());
-                savedRole == "admin" ?  navigate('/adminLogin'): navigate('/');
+                toast.success('Logged out', { position: toast.POSITION.TOP_CENTER, autoClose: 2000 });
+                savedRole === 'admin' ? navigate('/adminLogin') : navigate('/');
             }
         } catch (err) {
             console.log(err.message);
         }
-    }
+    };
+
+    const staffLinks = [
+        { to: '/createStudent', label: 'Create Student', icon: <UserPlus size={16} /> },
+        { to: '/allstudents',   label: 'All Students',   icon: <Users size={16} /> },
+        { to: '/createclass',   label: 'Create Class',   icon: <BookOpen size={16} /> },
+        { to: '/feeReport',     label: 'Fee Report',     icon: <BarChart2 size={16} /> },
+        { to: '/defaulterList', label: 'Defaulter List', icon: <AlertTriangle size={16} /> },
+    ];
+
+    const adminLinks = [
+        { to: '/admin/createStaff',  label: 'Create Staff',  icon: <UserPlus size={16} /> },
+        { to: '/admin/allStaff',     label: 'All Staff',     icon: <UserCog size={16} /> },
+        { to: '/admin/studentCount', label: 'Student Data',  icon: <Database size={16} /> },
+    ];
+
+    const links = savedRole === 'admin' ? adminLinks : staffLinks;
 
     return (
-        <>
-
-        <div className="sidebar p-4 "style={{ backgroundColor: '#2c3e50', height: '100vh', color: '#ecf0f1' }}>
-            <div className="profile mb-5">
-                <div className="avatar mb-3 d-flex justify-content-center align-items-center" style={{ width: '100px', height: '100px', borderRadius: '50%', backgroundColor: 'white', color: '#2c3e50', fontSize: '40px', margin: '0 auto' }}>
-                    {newName[0]}
+        <div className="sb-root">
+            {/* Brand */}
+            <div className="sb-brand">
+                <div className="sb-brand-icon"><GraduationCap size={20} /></div>
+                <div>
+                    <div className="sb-brand-name">GPS Fee</div>
+                    <div className="sb-brand-sub">Management System</div>
                 </div>
-                <h4 className="text-center mb-1">{newName}</h4>
-                { savedRole !== "admin" &&
-                <p className="text-center"> Campus : {campus}</p>}
             </div>
-            <nav className="mb-4">
-                <>
-                { savedRole === "admin" ?
-    <>
-        <Link className='link d-block mb-3 ' to='/admin/createStaff' style={{ color: '#bdc3c7' }}>Create Staff</Link>  
-        <Link className='link d-block mb-3 ' to='/admin/allStaff' style={{ color: '#bdc3c7' }}> All Staff</Link>
-        <Link className='link d-block mb-3 ' to='/admin/studentCount' style={{ color: '#bdc3c7' }}>Student Data</Link>  
-    </>
-    :
-    <>
-        <Link className='link d-block mb-3 ' to='/createStudent' style={{ color: '#bdc3c7' }}>Create Student</Link>
-        <Link className='link d-block mb-3 d' to='/allstudents'  style={{ color: '#bdc3c7' }} >All Students</Link>
-        <Link className='link d-block mb-3 ' to='/createclass' style={{ color: '#bdc3c7' }}>Create Class</Link>
-        <Link className='link d-block mb-3 d' to='/feeReport' style={{ color: '#bdc3c7' }}>Fee Report</Link> 
-        <Link className='link d-block mb-3 d' to='/defaulterList' style={{ color: '#bdc3c7' }}>Defaulter List</Link> 
-    </>
-}
 
-            
-            </>
+            {/* Profile */}
+            <div className="sb-profile">
+                <div className="sb-avatar">{initials}</div>
+                <div className="sb-profile-info">
+                    <div className="sb-profile-name">{name}</div>
+                    {savedRole !== 'admin' && campus && (
+                        <div className="sb-profile-campus">Campus {campus}</div>
+                    )}
+                </div>
+            </div>
+
+            {/* Nav */}
+            <nav className="sb-nav">
+                <div className="sb-nav-label">Menu</div>
+                {links.map(({ to, label, icon }) => (
+                    <NavLink
+                        key={to}
+                        to={to}
+                        className={({ isActive }) =>
+                            isActive ? 'sb-link sb-link-active' : 'sb-link'
+                        }
+                    >
+                        <span className="sb-link-icon">{icon}</span>
+                        <span>{label}</span>
+                    </NavLink>
+                ))}
             </nav>
-            <button
-                className="btn btn-danger w-100"
-                onClick={(e) => handleLogout(e)}
-            >
-                Logout
+
+            {/* Logout */}
+            <button className="sb-logout" onClick={handleLogout}>
+                <LogOut size={15} /> Logout
             </button>
-        </div> 
-     
-   
-       </>
+        </div>
     );
 }

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
-import axios from "axios";
+import axiosInstance from "../../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 
@@ -21,8 +21,8 @@ export default function AdminLogin() {
         password,
         };
 
-      const response = await axios.post(
-        "http://localhost:5000/api/v1/admin/login",
+      const response = await axiosInstance.post(
+        "/admin/login",
         data,
         { withCredentials: true }
       );

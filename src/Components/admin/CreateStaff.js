@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import Loader from '../Loader';
-import axios from 'axios';
+import axiosInstance from '../../api/axiosInstance';
 
 import { toast } from 'react-toastify';
 
@@ -23,7 +23,7 @@ const CreateStaff = () => {
     const data = {userName:staffName,password,campus}
     const token = document.cookie.split('=')[1];
     try{
-      const res = await axios.post('http://localhost:5000/api/v1/admin/staff/create',data,{
+      const res = await axiosInstance.post('/admin/staff/create',data,{
         headers:{
           "x-auth-token":token
         }

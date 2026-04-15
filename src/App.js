@@ -19,7 +19,7 @@ import StaffLogin from "./Components/StaffLogin";
 import { useSelector } from "react-redux";
 import { ProtactedRoutes } from "./Components/redux/protactedRoutes";
 import { useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "./api/axiosInstance";
 import { useDispatch } from "react-redux";
 import { useState } from "react";
 import AdminLogin from "./Components/admin/AdminLogin";
@@ -84,9 +84,9 @@ function AppContent({ role, isAuthenticated }) {
         try {
             const endpoint =
                 savedRole == "admin"
-                    ? "https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/auth/verifyAdmin"
-                    : "https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/auth/verify";
-            const response = await axios.get(endpoint, {
+                    ? "/auth/verifyAdmin"
+                    : "/auth/verify";
+            const response = await axiosInstance.get(endpoint, {
                 headers: {
                     "x-auth-token": token,
                 },

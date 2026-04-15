@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import {toast} from 'react-toastify';
+import axiosInstance from '../api/axiosInstance';
+import { toast } from 'react-toastify';
 import Loader from './Loader';
 
 const CreateClass = () => {
@@ -9,91 +8,94 @@ const CreateClass = () => {
   const [loading, setLoading] = useState(false);
   const [showClasses, setShowClasses] = useState([]);
 
-useEffect(()=>{
-async function AddClass(){ 
-await axios.get('http://localhost:5000/api/v1/classes').then((res)=>{
-  setShowClasses(res.data.classData)
-  console.log( res.data)
+  useEffect(() => {
+    async function fetchClasses() {
+      await axiosInstance.get('/classes').then((res) => {
+        setShowClasses(res.data.classData);
+      });
+    }
+    fetchClasses();
+  }, []);
 
-})
-}
-AddClass()
-},[])
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    await axiosInstance.post('/create/class', { className: classes })
+      .then((res) => {
+        setLoading(false);
+        setClasses('');
+        setShowClasses(prev => [...prev, { className: classes, _id: res.data.classData._id }]);
+        toast.success('Class created', { position: toast.POSITION.TOP_CENTER, autoClose: 2000 });
+      }).catch(() => {
+        setLoading(false);
+        toast.error('Class not created', { position: toast.POSITION.TOP_CENTER, autoClose: 2000 });
+      });
+  };
 
-
-const handleSubmit = async(e) => {
-  e.preventDefault();
-  setLoading(true);
-  const url = 'http://localhost:5000/api/v1/create/class';
-  await axios.post(url, { className: classes })
-  .then((res) => {
-    setLoading(false);
-    // Update the showClasses state with the newly added class
-    setShowClasses(prevClasses => [...prevClasses, { className: classes, _id: res.data.classData._id }]);
-    toast.success('Class created', {
-      position: toast.POSITION.TOP_CENTER,
-      autoClose: 2000
-    });
-  }).catch(() => {
-    toast.error('Class not created', {
-      position: toast.POSITION.TOP_CENTER,
-      autoClose: 2000
-    });
-  });
-};
-
-
-  const handleDelete = async(e,id) => {
-    e.preventDefault()
-   await axios.get(`http://localhost:5000/api/v1/class/${id}/delete`).then((res)=>setShowClasses(res.data.updatedClasses))
+  const handleDelete = async (e, id) => {
+    e.preventDefault();
+    await axiosInstance.get(`/class/${id}/delete`).then((res) => setShowClasses(res.data.updatedClasses));
   };
 
   return (
-    <div className="container mt-5">
-      {loading && (<Loader/>)}
-      {!loading && (
-        <div className="row justify-content-center">
-          <div className="col-md-6">
-            <form onSubmit={handleSubmit}>
-              <div className="mb-3">
-                <label htmlFor="className" className="form-label">Class Name</label>
-                <input 
-                  type="text" 
-                  className="form-control" 
-                  id="className" 
-                  value={classes} 
-                  onChange={(e) => setClasses(e.target.value)} 
-                />
-              </div>
-              <button type="submit"  style={{   backgroundColor:'#2c3e50'}} className="btn btn-primary">ADD</button>
-            </form>
-          </div>
+    <div className="cc-page">
+      {loading && <Loader />}
+
+      <div className="cc-card">
+        <div className="cc-header">
+          <h3 className="cc-title">Manage Classes</h3>
+          <p className="cc-subtitle">Add or remove classes from the system</p>
         </div>
-      )}
 
-<div className="w-50 mx-auto my-3">
-    <table className="table table-bordered">
-        <thead>
-            <tr>
-                <th className="text-center">All Classes</th>
-                <th className="text-center">Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {showClasses.map(c => (
-                <tr key={Math.random()}>
-                    <td className="text-center">{c.className}</td>
-                    <td className="text-center">
-                        <button onClick={(e) => handleDelete(e,c._id)} className="btn btn-danger">Delete</button>
-                    </td>
-                </tr>
-            ))}
-        </tbody>
-    </table>
-</div>
+        <div className="cc-body">
+          {/* Add Class Form */}
+          <form onSubmit={handleSubmit} className="cc-add-form">
+            <div className="cc-input-wrap">
+              <label className="cc-label">Class Name</label>
+              <input
+                type="text"
+                className="cc-input"
+                placeholder="e.g. Class 5, Nursery, KG..."
+                value={classes}
+                onChange={(e) => setClasses(e.target.value)}
+                required
+              />
+            </div>
+            <button type="submit" className="cc-add-btn">
+              + Add Class
+            </button>
+          </form>
 
+          {/* Divider */}
+          <div className="cc-divider">
+            <span>All Classes ({showClasses.length})</span>
+          </div>
+
+          {/* Classes List */}
+          {showClasses.length === 0 ? (
+            <div className="cc-empty">No classes added yet</div>
+          ) : (
+            <div className="cc-list">
+              {showClasses.map((c, i) => (
+                <div className="cc-list-item" key={c._id || i}>
+                  <div className="cc-class-info">
+                    <div className="cc-class-icon">{i + 1}</div>
+                    <span className="cc-class-name">{c.className}</span>
+                  </div>
+                  <button
+                    className="cc-delete-btn"
+                    onClick={(e) => handleDelete(e, c._id)}
+                  >
+                    Delete
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
-  )
-}
+  );
+};
 
 export default CreateClass;

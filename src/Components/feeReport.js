@@ -1,11 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import React from "react";
-import axios from "axios";
-import { CSVLink } from "react-csv";
+import axiosInstance from "../api/axiosInstance";
 import { toast } from "react-toastify";
 import Loader from "./Loader";
-import FeeReportPDF from "./FeeReportPDF";
-import { PDFViewer } from "@react-pdf/renderer";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 
@@ -14,345 +11,195 @@ const FeeReport = () => {
   const [endDate, setEndDate] = useState("");
   const [students, setStudents] = useState([]);
   const [grNum, setGrNum] = useState("");
-  const [filterByGr, setFilterByGr] = useState([]);
   const [displayStudents, setDisplayStudents] = useState([]);
-  const [feeStatus, setFeeStatus] = useState();
   const [loading, setLoading] = useState(false);
-  const [showPDF, setShowPDF] = useState(false);
 
-    const token = localStorage.getItem('token')
+  const token = localStorage.getItem('token');
 
-  
-  
   const handleDate = async (e) => {
     e.preventDefault();
-
-
     try {
       setLoading(true);
       if (startDate && endDate) {
-        await axios
-          .get(
-            `https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/student/feeReport?startDate=${startDate}&endDate=${endDate}`,
-            {
-              headers: {
-                "x-auth-token": token,
-              },
-            }
-          )
-          .then((res) => {
-            console.log(res)
-            const allFeeStatus = res.data.data.map(
-              (student) => student.feeStatus
-            
-            );
-            setFeeStatus(allFeeStatus);
+        await axiosInstance.get(
+          `/student/feeReport?startDate=${startDate}&endDate=${endDate}`,
+          { headers: { "x-auth-token": token } }
+        ).then((res) => {
+          const sortedData = res.data.data
+            .map((student) => ({
+              ...student,
+              feeStatus: student.feeStatus.sort((a, b) => new Date(a.date) - new Date(b.date))
+            }))
+            .sort((a, b) => new Date(a.feeStatus[0].date) - new Date(b.feeStatus[0].date));
 
-            const sortedData = res.data.data
-              .map((student) => {
-                const sortedFeeStatus = student.feeStatus.sort(
-                  (a, b) => new Date(a.date) - new Date(b.date)
-                );
-                return { ...student, feeStatus: sortedFeeStatus };
-              })
-              .sort(
-                (a, b) =>
-                  new Date(a.feeStatus[0].date) - new Date(b.feeStatus[0].date)
-              );
-
-            setStudents(sortedData);
-
-            setDisplayStudents(sortedData);
-            setLoading(false);
-            if (sortedData.length === 0) {
-              toast.error("No Students Found", {
-                position: toast.POSITION.TOP_CENTER,
-                autoClose: 2000,
-              });
-            }
-          });
-      } else {
-        console.log("undefined start and end Date");
+          setStudents(sortedData);
+          setDisplayStudents(sortedData);
+          setLoading(false);
+          if (sortedData.length === 0) {
+            toast.error("No Students Found", { position: toast.POSITION.TOP_CENTER, autoClose: 2000 });
+          }
+        });
       }
     } catch (err) {
+      setLoading(false);
       console.log(err);
     }
   };
 
   const handleGrNum = (e) => {
     e.preventDefault();
-    if (grNum === "") {
-      setDisplayStudents(students);
-    }
-
-    if (students) {
-      const student = students.filter((s) => s.GRNo == grNum);
-      setFilterByGr(student);
-      setDisplayStudents(student);
-    }
+    if (grNum === "") { setDisplayStudents(students); return; }
+    const student = students.filter((s) => s.GRNo == grNum);
+    setDisplayStudents(student);
   };
 
-  // convert Date Format
-
   function convertDate(inputFormat) {
-    function pad(s) {
-      return s < 10 ? "0" + s : s;
-    }
-    var d = new Date(inputFormat);
-    return [d.getMonth() + 1, pad(d.getDate()), pad(d. getFullYear())].join("-");
+    const pad = (s) => s < 10 ? "0" + s : s;
+    const d = new Date(inputFormat);
+    return [d.getMonth() + 1, pad(d.getDate()), pad(d.getFullYear())].join("-");
   }
- 
+
   const formattedStartDate = convertDate(startDate);
   const formattedEndDate = convertDate(endDate);
 
+  const studentCampus = students && students.map(s => s.campus?.[0]);
 
-console.log( startDate , endDate)
+  const generateAndDownloadPDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "bold");
+    doc.text("Green Peace School", doc.internal.pageSize.getWidth() / 2, 20, "center");
+    doc.text(`Campus: ${studentCampus[0]}`, doc.internal.pageSize.getWidth() / 2, 30, "center");
 
-  const headers = [
-    "Name",
-    "GRNO",
-    "Month",
-    "Fee Status",
-    "Date",
-    "Month",
-    "Fee Status",
-    "Date",
-    "Month",
-    "Fee Status",
-    "Date",
-  ];
-const studentCmapus= students && students.map(s=> s.campus[0])
-const generateAndDownloadPDF = () => {
-  const doc = new jsPDF();
+    const headers = ["GRNo", "Name", "Month", "Status", "Date", "Fee Paid", "Fee Type"];
+    const tableData = [];
+    let totalFeeReceived = 0;
 
-  // Add the school name and campus at the top center of the page
-  doc.setFontSize(16);
-  doc.setFont("helvetica", "bold");
-  doc.text("Green Peace School", doc.internal.pageSize.getWidth() / 2, 20, "center");
-  doc.text(`Campus: ${studentCmapus[0]}`, doc.internal.pageSize.getWidth() / 2, 30, "center");
-
-  const headers = ["GRNo", "Name", "Month", " Status", "Date", "Fee Paid", "Fee Type"];
-  const tableData = [];
-  let totalFeeReceived=0;
-  displayStudents.forEach(student => {
+    displayStudents.forEach(student => {
       const feeDetails = student.feeStatus.filter(status => {
-          const paymentDate = status.date && new Date(status.date.split("T")[0]);
-          return (
-              paymentDate >= new Date(formattedStartDate) &&
-              paymentDate <= new Date(formattedEndDate)
-          );
+        const paymentDate = status.date && new Date(status.date.split("T")[0]);
+        return paymentDate >= new Date(formattedStartDate) && paymentDate <= new Date(formattedEndDate);
       });
-
       if (feeDetails.length > 0) {
-          feeDetails.forEach((detail, index) => {
-              totalFeeReceived += parseFloat(detail.feeReceived) || 0;
-              tableData.push([
-                  index === 0 ? student.GRNo : "",  // Only display GRNo for the first row
-                  index === 0 ? student.studentName : "",  // Only display student name for the first row
-                  detail.month,
-                  detail.status,
-                  detail.date.split("T")[0],
-                  detail.feeReceived,
-                  detail.feeType.join(", ")  // Assuming feeType is an array
-              ]);
-   
-         
-            });
+        feeDetails.forEach((detail, index) => {
+          totalFeeReceived += parseFloat(detail.feeReceived) || 0;
+          tableData.push([
+            index === 0 ? student.GRNo : "",
+            index === 0 ? student.studentName : "",
+            detail.month, detail.status,
+            detail.date.split("T")[0],
+            detail.feeReceived,
+            detail.feeType.join(", ")
+          ]);
+        });
       }
-  });
+    });
 
-  doc.autoTable(headers, tableData, {
-    startY: 40,
-    styles: { fontSize: 10, textAlign: "center" },
-    headStyles: { textColor: [0, 0, 0], fontSize: 12, fontStyle: 'bold',fillColor:false  }, // Updated headStyles
-    margin: { top: 10, right: 5, bottom: 10, left: 5 },
-    tableWidth: 'auto',
-      columnStyles: {
-          0: { cellWidth: 20 },  // Adjusted cell width for GRNo
-          1: { cellWidth: 30 },  // Adjusted cell width for Student Name
-          2: { cellWidth: 22 },  // Adjusted cell width for Month
-          3: { cellWidth: 30 },  // Adjusted cell width for Fee Status
-          4: { cellWidth: 35 },  // Adjusted cell width for Date
-          5: { cellWidth: 30 },  // Adjusted cell width for Fee Received
-          6: { cellWidth: 'auto' }  // Let Fee Type take the remaining space
-      }
-  });
-  doc.setFontSize(14);
-  doc.setFont("helvetica", "bold");
-  doc.text(
-    `Total Fee Received: ${totalFeeReceived}`,
-    doc.internal.pageSize.getWidth() / 2,
-    doc.autoTable.previous.finalY + 20, // Position it 20 units below the table
-    "center"
-  );
-
-  // Save the PDF
-  const fileName = `school_info_${Date.now()}.pdf`;
-  doc.save(fileName);
-};
-
+    doc.autoTable(headers, tableData, {
+      startY: 40,
+      styles: { fontSize: 10, textAlign: "center" },
+      headStyles: { textColor: [0, 0, 0], fontSize: 12, fontStyle: 'bold', fillColor: false },
+      margin: { top: 10, right: 5, bottom: 10, left: 5 },
+      tableWidth: 'auto',
+      columnStyles: { 0: { cellWidth: 20 }, 1: { cellWidth: 30 }, 2: { cellWidth: 22 }, 3: { cellWidth: 30 }, 4: { cellWidth: 35 }, 5: { cellWidth: 30 }, 6: { cellWidth: 'auto' } }
+    });
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text(`Total Fee Received: ${totalFeeReceived}`, doc.internal.pageSize.getWidth() / 2, doc.autoTable.previous.finalY + 20, "center");
+    doc.save(`fee_report_${Date.now()}.pdf`);
+  };
 
   return (
-    <>
+    <div className="fr-page">
       {loading && <Loader />}
-      <div className="filter-gr">
-      {displayStudents.length > 0 && (
-        <button
-          className="csv-btn"
-          onClick={generateAndDownloadPDF}
-        >
-          Download PDF
-        </button>
-      )}
-      {students.length > 0 && (
-        <div className="w-50 mx-auto my-3">
-          <label htmlFor="grNum" className="ms-2 mb-2">
-            Filter by Gr:
-          </label>
 
-          <form
-            onSubmit={handleGrNum}
-            className="form-inline d-flex justify-content-between"
-          >
-            <input
-              required
-              id="grNum"
-              className="form-control mx-2"
-              type="number"
-              value={grNum}
-              onChange={(e) => setGrNum(e.target.value)}
-            />
-
-            <button className="btn btn-primary" type="submit">
-              Search
-            </button>
-          </form>
+      {/* Filter Panel */}
+      <div className="fr-filter-card">
+        <div className="fr-filter-header">
+          <h3 className="fr-title">Fee Report</h3>
+          <p className="fr-subtitle">Filter payments by date range</p>
         </div>
-      )}
-  </div>
-      <div className="row my-4">
-        <div className="col">
-          <form
-            onSubmit={(e) => handleDate(e)}
-            className="w-50 mx-auto d-flex align-items-end"
-          >
-            <div className="col">
-              <label htmlFor="inputName" className="form-label">
-                Start Date
-              </label>
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="form-control"
-                id="inputName"
-                autoComplete="off"
-                required
-              />
-            </div>
-
-            <div className="col ms-2">
-              <label htmlFor="inputName" className="form-label">
-                End Date
-              </label>
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="form-control"
-                id="inputName"
-                autoComplete="off"
-                required
-              />
-            </div>
-
-            <div>
-              <div class="col ms-2">
-                <button
-                  style={{ backgroundColor: "#2c3e50" }}
-                  class="btn btn-primary"
-                >
-                  Generate Report
-                </button>
-              </div>
-            </div>
-          </form>
-        </div>
+        <form onSubmit={handleDate} className="fr-filter-form">
+          <div className="fr-field">
+            <label className="fr-label">Start Date</label>
+            <input type="date" className="fr-input" value={startDate}
+              onChange={(e) => setStartDate(e.target.value)} required />
+          </div>
+          <div className="fr-field">
+            <label className="fr-label">End Date</label>
+            <input type="date" className="fr-input" value={endDate}
+              onChange={(e) => setEndDate(e.target.value)} required />
+          </div>
+          <button type="submit" className="fr-generate-btn">Generate Report</button>
+        </form>
       </div>
 
+      {/* Results */}
       {displayStudents.length > 0 ? (
-        <>
-          <table className="table-container">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>GRNO</th>
-                <th>Fee Details</th>
-              </tr>
-            </thead>
-            <tbody>
-              {displayStudents.map((student) => (
-                <tr key={student._id}>
-                  <td>{student.studentName}</td>
-                  <td>{student.GRNo}</td>
+        <div className="fr-results-card">
+          {/* Toolbar */}
+          <div className="fr-toolbar">
+            <span className="fr-results-count">{displayStudents.length} student(s) found</span>
+            <div className="fr-toolbar-actions">
+              <form onSubmit={handleGrNum} className="fr-gr-form">
+                <input className="fr-gr-input" type="number" placeholder="Filter by GR No."
+                  value={grNum} onChange={(e) => setGrNum(e.target.value)} />
+                <button type="submit" className="fr-gr-btn">Search</button>
+              </form>
+              <button className="fr-download-btn" onClick={generateAndDownloadPDF}>
+                ↓ Download PDF
+              </button>
+            </div>
+          </div>
 
-                  <td>
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>Month</th>
-                          <th>Fee Status</th>
-                          <th>Date</th>
-                          <th>Fee Received</th>
-                          <th>Fee Type</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {student.feeStatus
-                          .filter((status) => {
-                            const paymentDate =
-                              status.date &&
-                              new Date(status.date.split("T")[0]);
-                            return (
-                              paymentDate >= new Date(formattedStartDate) &&
-                              paymentDate <= new Date(formattedEndDate)
-                            );
-                          })
-                          .map((status) => (
-                            <tr key={status._id}>
-                              <td>{status.month}</td>
-                              <td>{status.status}</td>
-                              <td> {status.date.split("T")[0]}</td>
-                              <td>{status.feeReceived}</td>
-                              <td>{status.feeType.map(type => type.split("  ").join(",")).join(', ')}</td>
-
-                        
-                            </tr>
-                          ))}
-                      </tbody>
-                    </table>
-                  </td>
+          {/* Table */}
+          <div className="fr-table-wrap">
+            <table className="fr-table">
+              <thead>
+                <tr>
+                  <th>GR No.</th>
+                  <th>Student Name</th>
+                  <th>Month</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                  <th>Fee Paid</th>
+                  <th>Fee Type</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </>
-      ) : (
-        <div className="msg-container">
-          <div className="no-data-message">
-            Select start and end date to display data
+              </thead>
+              <tbody>
+                {displayStudents.map((student) => {
+                  const filteredFees = student.feeStatus.filter((status) => {
+                    const paymentDate = status.date && new Date(status.date.split("T")[0]);
+                    return paymentDate >= new Date(formattedStartDate) && paymentDate <= new Date(formattedEndDate);
+                  });
+                  return filteredFees.map((status, idx) => (
+                    <tr key={`${student._id}-${idx}`} className={idx === 0 ? 'fr-row-first' : 'fr-row-cont'}>
+                      <td className="fr-td-name">{idx === 0 ? student.GRNo : ''}</td>
+                      <td className="fr-td-name">{idx === 0 ? student.studentName : ''}</td>
+                      <td>{status.month}</td>
+                      <td>
+                        <span className={`fr-status-badge ${status.status === 'Paid' ? 'fr-paid' : 'fr-pending'}`}>
+                          {status.status}
+                        </span>
+                      </td>
+                      <td>{status.date.split("T")[0]}</td>
+                      <td className="fr-amount">Rs. {status.feeReceived}</td>
+                      <td>{status.feeType?.map(t => t.trim()).join(', ')}</td>
+                    </tr>
+                  ));
+                })}
+              </tbody>
+            </table>
           </div>
         </div>
+      ) : (
+        !loading && (
+          <div className="msg-container">
+            <div className="no-data-message">Select a date range above to generate the report</div>
+          </div>
+        )
       )}
-      {/* {displayStudents.length > 0 && (
-        <button
-          className="csv-btn"
-          onClick={generateAndDownloadPDF}
-        >
-          Download PDF
-        </button>
-      )} */}
-    </>
+    </div>
   );
 };
 

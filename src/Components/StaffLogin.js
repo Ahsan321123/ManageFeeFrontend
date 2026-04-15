@@ -4,6 +4,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import './Select.css'
+import axiosInstance from "../api/axiosInstance";
 export default function StaffLogin() {
   const [password, setPassword] = useState("");
   const [userName, setUserName] = useState("");
@@ -25,8 +26,8 @@ export default function StaffLogin() {
         campus,
       };
 
-      const response = await axios.post(
-        "https://gps-fee-3ed30914cca3.herokuapp.com/api/v1/staff/login",
+      const response = await axiosInstance.post(
+        "/staff/login",
         data,
         { withCredentials: true }
       );
